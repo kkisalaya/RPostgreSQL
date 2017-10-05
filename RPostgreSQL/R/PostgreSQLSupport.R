@@ -75,7 +75,7 @@ postgresqlDriverInfo <- function(obj, what="", ...) {
 ## These are treated as default values.
 postgresqlNewConnection <- function(drv, user = "", password = "",
                                     host = "", dbname = "",
-                                    port = "", tty = "", options = "", forceISOdate=TRUE) {
+                                    port = "", tty = "", options = "",  application_name = "", forceISOdate=TRUE ) {
     if(!isPostgresqlIdCurrent(drv))
         stop("expired manager")
     if(is.null(user))
@@ -92,10 +92,12 @@ postgresqlNewConnection <- function(drv, user = "", password = "",
         tty=""
     if(is.null(options))
         options=""
+    if(is.null(application_name))
+        application_name=""
 
     con.params <- as.character(c(user, password, host,
                                  dbname, port,
-                                 tty, options))
+                                 tty, options, application_name))
 
     drvId <- as(drv, "integer")
     conId <- .Call(RS_PostgreSQL_newConnection, drvId, con.params)

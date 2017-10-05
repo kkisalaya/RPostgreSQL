@@ -222,7 +222,7 @@ RS_PostgreSQL_cloneConnection(Con_Handle * conHandle)
      * vector to be passed to the RS_PostgreSQL_newConnection() function.
      */
 
-    MEM_PROTECT(con_params = NEW_CHARACTER((Sint) 7));
+    MEM_PROTECT(con_params = NEW_CHARACTER((Sint) 8));
     SET_CHR_EL(con_params, 0, C_S_CPY(conParams->user));
     SET_CHR_EL(con_params, 1, C_S_CPY(conParams->password));
     SET_CHR_EL(con_params, 2, C_S_CPY(conParams->host));
@@ -230,6 +230,7 @@ RS_PostgreSQL_cloneConnection(Con_Handle * conHandle)
     SET_CHR_EL(con_params, 4, C_S_CPY(conParams->port));
     SET_CHR_EL(con_params, 5, C_S_CPY(conParams->tty));
     SET_CHR_EL(con_params, 6, C_S_CPY(conParams->options));
+    SET_CHR_EL(con_params, 7, C_S_CPY(conParams->application_name));
 
     MEM_UNPROTECT(1);
     UNPROTECT(1);
@@ -278,6 +279,9 @@ RS_PostgreSQL_freeConParams(RS_PostgreSQL_conParams * conParams)
     if (conParams->options) {
         free(conParams->options);
     }
+    if (conParams->application_name) {
+        free(conParams->application_name);
+    }
 
     free(conParams);
     return;
@@ -291,8 +295,9 @@ RS_PostgreSQL_newConnection(Mgr_Handle * mgrHandle, s_object * con_params)
     RS_PostgreSQL_conParams *conParams;
     Con_Handle *conHandle;
     PGconn *my_connection;
+    char buff[1024];
 
-    const char *user = NULL, *password = NULL, *host = NULL, *dbname = NULL, *port = NULL, *tty = NULL, *options = NULL;
+    const char *user = NULL, *password = NULL, *host = NULL, *dbname = NULL, *port = NULL, *tty = NULL, *options = NULL, *application_name = NULL;
 
     if (!is_validHandle(mgrHandle, MGR_HANDLE_TYPE)) {
         RS_DBI_errorMessage("invalid PostgreSQLManager", RS_DBI_ERROR);
@@ -305,8 +310,12 @@ RS_PostgreSQL_newConnection(Mgr_Handle * mgrHandle, s_object * con_params)
     port = CHR_EL(con_params, 4);
     tty = CHR_EL(con_params, 5);
     options = CHR_EL(con_params, 6);
+    application_name = CHR_EL(con_params, 7);
 
-    my_connection = PQsetdbLogin(host, port, options, tty, dbname, user, password);
+    /* Construct connection string */
+    (void)sprintf(buff, "host=%s port=%s options=%s tty=%s dbname=%s user=%s password=%s application_name=%s", host, port, options, tty, dbname, user, password, application_name);
+    my_connection = PQconnectdb(buff); 
+/*    my_connection = PQsetdbLogin(host, port, options, tty, dbname, user, password); */
 
     conParams = RS_postgresql_allocConParams();
 
@@ -325,6 +334,7 @@ RS_PostgreSQL_newConnection(Mgr_Handle * mgrHandle, s_object * con_params)
     conParams->port = RS_DBI_copyString(PQport(my_connection));
     conParams->tty = RS_DBI_copyString(PQtty(my_connection));
     conParams->options = RS_DBI_copyString(PQoptions(my_connection));
+    conParams->application_name = RS_DBI_copyString(application_name);
 
     if (PQstatus(my_connection) != CONNECTION_OK) {
         char buf[1024];

@@ -39,6 +39,7 @@ extern "C" {
         char *port;
         char *tty;
         char *options;
+        char *application_name;
     } RS_PostgreSQL_conParams;
 
     RS_PostgreSQL_conParams *RS_PostgreSQL_allocConParams(void);
