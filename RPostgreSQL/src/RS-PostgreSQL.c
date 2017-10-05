@@ -313,7 +313,7 @@ RS_PostgreSQL_newConnection(Mgr_Handle * mgrHandle, s_object * con_params)
     application_name = CHR_EL(con_params, 7);
 
     /* Construct connection string */
-    (void)sprintf(buff, "host=%s port=%s options=%s tty=%s dbname=%s user=%s password=%s application_name=%s", host, port, options, tty, dbname, user, password, application_name);
+    (void)sprintf(buff, "host='%s' port='%s' options='%s' tty='%s' dbname='%s' user='%s' password='%s' application_name='%s'", host, port, options, tty, dbname, user, password, application_name);
     my_connection = PQconnectdb(buff); 
 /*    my_connection = PQsetdbLogin(host, port, options, tty, dbname, user, password); */
 
