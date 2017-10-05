@@ -1,7 +1,7 @@
-###Fork of RPostgreSQL to add additional parameter 'application_name' to dbConnect method
+### Fork of RPostgreSQL to add additional parameter 'application_name' to dbConnect method
 The dbConnect parameter now takes an additonal optional parameter, 'application_name' which allows to pass the application name to the underlying database connection.
 
-##Original Readme follows
+## Original Readme follows
 
 # RPostgreSQL
 An R Interface to PostgreSQL.
